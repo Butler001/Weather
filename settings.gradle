@@ -1,0 +1,3 @@
+rootProject.name = "Weather-Butler"
+include ':app'
+include ':mvplibrary'

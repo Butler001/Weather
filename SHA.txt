@@ -1,0 +1,50 @@
+开发版SHA1 88:47:6A:D5:BE:24:7E:67:4A:77:F4:6A:61:B0:D2:1E:8B:D4:F6:B8
+发布版SHA1 3D:FF:3E:48:E1:CD:D6:FE:6C:96:45:3C:E9:CC:3D:92:B4:12:61:6F
+
+Key store path : weatherButler.jks
+password 1358994174RT 
+
+key : key0
+1358994174RT
+
+D:\Android.project\WeatherButler>keytool -list -v -keystore D:\Android.project\WeatherButler\WeatherButler.jks //注意中间的空格也要保持一致
+输入密钥库口令:
+密钥库类型: PKCS12
+密钥库提供方: SUN
+
+您的密钥库包含 1 个条目
+
+别名: key0
+创建日期: 2021年10月26日
+条目类型: PrivateKeyEntry
+证书链长度: 1
+证书[1]:
+所有者: CN=LQL, L=wuhan, ST=hubei, C=china
+发布者: CN=LQL, L=wuhan, ST=hubei, C=china
+序列号: 20a8df89
+生效时间: Tue Oct 26 22:07:08 CST 2021, 失效时间: Sat Oct 20 22:07:08 CST 2046
+证书指纹:
+         SHA1: 3D:FF:3E:48:E1:CD:D6:FE:6C:96:45:3C:E9:CC:3D:92:B4:12:61:6F
+         SHA256: D1:3F:9A:70:44:FF:B7:1C:AB:7F:D3:92:93:98:25:66:CE:1E:D1:60:41:42:F0:EA:06:51:6A:5F:7F:AA:0A:A9
+签名算法名称: SHA256withRSA
+主体公共密钥算法: 2048 位 RSA 密钥
+版本: 3
+
+扩展:
+
+#1: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: 39 D9 13 BA D5 4C 6C 2C   E4 41 9D 7E 21 A9 81 54  9....Ll,.A..!..T
+0010: 6A 6D 02 58                                        jm.X
+]
+]
+
+
+
+*******************************************
+*******************************************
+
+
+GITHUB   TOKEN
+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

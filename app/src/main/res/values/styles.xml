@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="text_general">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="text_title">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+    
+<!--    白色风车-->
+    <declare-styleable name="whiteWindmills" >
+        <attr name="windColor" format="reference|color"/>
+    </declare-styleable>
+
+
+</resources>

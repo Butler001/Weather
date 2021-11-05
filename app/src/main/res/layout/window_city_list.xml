@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:background="#FFF"
+        android:layout_width="240dp"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <androidx.appcompat.widget.Toolbar
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:contentInsetLeft="16dp"
+                app:popupTheme="@style/Widget.AppCompat.Light.ListPopupWindow"
+                >
+                <TextView
+                    android:id="@+id/window_title"
+                    android:layout_gravity="center"
+                    android:textAppearance="@style/text_title"
+                    android:text="china"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </androidx.appcompat.widget.Toolbar>
+
+<!--            城市列表的返回-->
+            <ImageView
+                android:id="@+id/iv_back_city"
+                android:visibility="gone"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_centerVertical="true"
+                android:src="@mipmap/back"
+                android:padding="15dp"
+                android:scaleType="fitCenter"
+                android:layout_width="@dimen/dp_40"
+                android:layout_height="@dimen/dp_40"/>
+<!--            区县列表的返回-->
+            <ImageView
+                android:id="@+id/iv_back_direct"
+                android:visibility="gone"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:layout_centerVertical="true"
+                android:src="@mipmap/back"
+                android:padding="15dp"
+                android:scaleType="fitCenter"
+                android:layout_width="@dimen/dp_40"
+                android:layout_height="@dimen/dp_40"/>
+
+        </RelativeLayout>
+<!--分割线-->
+        <View
+            android:background="#EEEEEE"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"/>
+<!--        数据展示-->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_city_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
