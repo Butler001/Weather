@@ -32,8 +32,10 @@ public class CityWindow {
         return mMap;
     }
 
-    public CityWindow(Context mContext) {
-        this.mContext = mContext;
+    public CityWindow(Context Context) {
+        this.mContext = Context;
+        inflater = LayoutInflater.from(Context);
+        cityWindow = this;
     }
 
     public CityWindow(Context mContext, Map<String, Object> mMap) {

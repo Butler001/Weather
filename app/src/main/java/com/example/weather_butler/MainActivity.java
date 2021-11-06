@@ -6,7 +6,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -105,8 +107,6 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
     TextView windDirection;
     @BindView(R.id.wind_power)
     TextView windPower;
-    @BindView(R.id.scroll)
-    ScrollView scroll;
     @BindView(R.id.iv_city_select)
     ImageView ivCitySelect;
 
@@ -117,8 +117,8 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
     //定位器
     public LocationClient mLocationClient = null;
     private MyLocationListener myListener = new MyLocationListener();
-    //get city
-    private String district;
+    //get locationId
+    private ApiService apiService_location;
     //get resource for weather
     List<WeatherForcastResponse.Daily> list_forecast_weather;
     //get adapter
@@ -134,7 +134,7 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
     ProvinceAdapter provinceAdapter;
     CityAdapter cityAdapter;
     AreaAdapter areaAdapter;
-    String cityTitle;
+    private String provinceTitle;
     CityWindow cityWindow;
 
     //permissions check
@@ -191,7 +191,6 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
         initWeatherList();
         rxPermissions = new RxPermissions(this);
         permissionVersion();
-
     }
 
     @Override
@@ -214,7 +213,6 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
     @OnClick(R.id.iv_city_select)
     public void onViewClicked() {
         showCityWindow();
-        Log.e(TAG, "onViewClick: ");
     }
 
     /**
@@ -227,10 +225,10 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
         list = new ArrayList<>();
         cityWindow = new CityWindow(context);
         final View view = LayoutInflater.from(context).inflate(R.layout.window_city_list, null);
-        ImageView cityBack = findViewById(R.id.iv_back_city);
-        ImageView areaBack = findViewById(R.id.iv_back_direct);
-        TextView windowTitle = findViewById(R.id.window_title);
-        RecyclerView rv_city = findViewById(R.id.rv_city_list);
+        ImageView cityBack = view.findViewById(R.id.iv_back_city);
+        ImageView areaBack = view.findViewById(R.id.iv_back_direct);
+        TextView windowTitle = view.findViewById(R.id.window_title);
+        RecyclerView rv_city = view.findViewById(R.id.rv_city_list);
         cityWindow.showRightPopupWindow(view);
         initCityData(rv_city, cityBack, areaBack, windowTitle);
     }
@@ -248,7 +246,6 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
         if (response.body() != null) {
             //布局数据
             temperatureCurrent.setText(response.body().getNow().getTemp());
-            areaTv.setText(district);
             temperatureCondition.setText(response.body().getNow().getText());
             temperatureTimeUpdate.setText("更新时间: " + response.body().getUpdateTime().replace("+08:00", "").replace("T", " "));
 
@@ -361,10 +358,10 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
             String country = bdLocation.getCountry();
             String province = bdLocation.getProvince();
             String city = bdLocation.getCity();
-            district = bdLocation.getDistrict();
+            String district = bdLocation.getDistrict();
             String street = bdLocation.getStreet();
             String locationDescribe = bdLocation.getLocationDescribe();
-
+            areaTv.setText(district);
 
             //get locationId
 
@@ -372,8 +369,8 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
                     .baseUrl("https://geoapi.qweather.com/v2/city/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
-            ApiService apiService = retrofit.create(ApiService.class);
-            retrofit2.Call<LocationInfo> call = apiService.getCityId(city);
+            apiService_location = retrofit.create(ApiService.class);
+            retrofit2.Call<LocationInfo> call = apiService_location.getCityId(city);
             call.enqueue(new retrofit2.Callback<LocationInfo>() {
                 @Override
                 public void onResponse(retrofit2.Call<LocationInfo> call, retrofit2.Response<LocationInfo> response) {
@@ -400,7 +397,7 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
     }
 
     /**
-     * 初始化天气列表
+     * 初始化天气预测列表
      */
     @SuppressLint("ResourceType")
     public void initWeatherList() {
@@ -418,15 +415,16 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
      * @param recyclerView
      * @param cityBack
      * @param areaBack
-     * @param windowTtile
+     * @param windowTitle
      */
-    public void initCityData(RecyclerView recyclerView, ImageView cityBack, ImageView areaBack, TextView windowTtile) {
+    private void initCityData(RecyclerView recyclerView, ImageView cityBack, ImageView areaBack, TextView windowTitle) {
         /**
          * 初始化省级数据，添加到列表中
          */
         try {
-            InputStream inputStream = getResources().getAssets().open("City.txt");
-
+            //读取城市数据
+            InputStream inputStream = getResources().getAssets().open("City");
+            int size = inputStream.available();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             StringBuffer stringBuffer = new StringBuffer();
             String lines = bufferedReader.readLine();
@@ -434,138 +432,155 @@ public class MainActivity extends MvpActivity<WeatherContract.WeatherPresenter> 
                 stringBuffer.append(lines);
                 lines = bufferedReader.readLine();
             }
-            /**
-             * 用数组获取省级数据 ，显示到列表上
-             */
-            final JSONArray data = new JSONArray(stringBuffer.toString());
-            for (int i = 0; i < data.length(); i++) {
-                JSONObject provinceObject = data.getJSONObject(i);
-                String provinceName = provinceObject.getString("name");
-                CityResponse response = new CityResponse();
-                response.setName(provinceName);
-                provinceList.add(response);
-            }
-            /**
-             * 定义省份显示适配器
-             */
-            provinceAdapter = new ProvinceAdapter(R.layout.item_city_list, provinceList);
-            LinearLayoutManager manager = new LinearLayoutManager(context);
-            recyclerView.setLayoutManager(manager);
-            recyclerView.setAdapter(provinceAdapter);
-            provinceAdapter.notifyDataSetChanged();
-            RecycleViewAnimation.runLayoutAnimationRight(recyclerView);
-            provinceAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
-                @Override
-                public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-                    try {
-                        //返回上一级数据
-                        cityBack.setVisibility(View.VISIBLE);
-                        cityBack.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                recyclerView.setAdapter(provinceAdapter);
-                                provinceAdapter.notifyDataSetChanged();
-                                cityBack.setVisibility(View.GONE);
-                                windowTtile.setText("china");
+                /**
+                 * 用数组获取省级数据 ，显示到列表上
+                 */
+                final JSONArray data = new JSONArray(stringBuffer.toString());
+                for (int i = 0; i < data.length(); i++) {
+                    JSONObject provinceObject = data.getJSONObject(i);
+                    String provinceName = provinceObject.getString("name");
+                    CityResponse response = new CityResponse();
+                    response.setName(provinceName);
+                    provinceList.add(response);
+                }
+
+
+                /**
+                 * 定义省份显示适配器
+                 */
+                provinceAdapter = new ProvinceAdapter(R.layout.item_city_list, provinceList);
+                LinearLayoutManager manager = new LinearLayoutManager(context);
+                recyclerView.setLayoutManager(manager);
+                recyclerView.setAdapter(provinceAdapter);
+                provinceAdapter.notifyDataSetChanged();
+                RecycleViewAnimation.runLayoutAnimationRight(recyclerView);
+                provinceAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
+                    @Override
+                    public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
+                        try {
+                            //返回上一级数据
+                            cityBack.setVisibility(View.VISIBLE);
+                            cityBack.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    recyclerView.setAdapter(provinceAdapter);
+                                    provinceAdapter.notifyDataSetChanged();
+                                    cityBack.setVisibility(View.GONE);
+                                    windowTitle.setText("china");
+                                }
+                            });
+
+                            /**
+                             * 根据当前所在省份的数组获取城市的数组
+                             */
+                            JSONObject provinceObject = data.getJSONObject(position);
+                            windowTitle.setText(provinceList.get(position).getName());
+                            provinceTitle = provinceList.get(position).getName();
+                            final JSONArray cityArray = provinceObject.getJSONArray("city");
+
+                            //更新列表数据
+                            if (cityList != null) {
+                                cityList.clear();
                             }
-                        });
+                            for (int i = 0; i < cityArray.length(); i++) {
+                                JSONObject cityObject = cityArray.getJSONObject(i);
+                                String cityName = cityObject.getString("name");
+                                CityResponse.CityBean response = new CityResponse.CityBean();
+                                response.setName(cityName);
+                                cityList.add(response);
+                            }
 
-                        /**
-                         * 根据当前所在省份的数组获取城市的数组
-                         */
-                        JSONObject provinceObject = data.getJSONObject(position);
-                        windowTtile.setText(provinceList.get(position).getName());
-                        String provinceTitle = provinceList.get(position).getName();
-                        final JSONArray cityArray = provinceObject.getJSONArray("city");
+                            cityAdapter = new CityAdapter(R.layout.item_city_list, cityList);
+                            LinearLayoutManager manager = new LinearLayoutManager(context);
+                            recyclerView.setLayoutManager(manager);
+                            recyclerView.setAdapter(cityAdapter);
+                            RecycleViewAnimation.runLayoutAnimationRight(recyclerView);
 
-                        //更新列表数据
-                        if (cityList != null) {
-                            cityList.clear();
-                        }
-                        for (int i = 0; i < cityArray.length(); i++) {
-                            JSONObject cityObject = cityArray.getJSONObject(i);
-                            String cityName = cityObject.getString("name");
-                            CityResponse.CityBean response = new CityResponse.CityBean();
-                            response.setName(cityName);
-                            cityList.add(response);
-                        }
-
-                        cityAdapter = new CityAdapter(R.layout.item_city_list, cityList);
-                        LinearLayoutManager manager = new LinearLayoutManager(context);
-                        recyclerView.setLayoutManager(manager);
-                        recyclerView.setAdapter(cityAdapter);
-                        RecycleViewAnimation.runLayoutAnimationRight(recyclerView);
-
-                        cityAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
-                            @Override
-                            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-                                //返回上一级数据
-                                areaBack.setVisibility(View.VISIBLE);
-                                areaBack.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        recyclerView.setAdapter(cityAdapter);
-                                        cityAdapter.notifyDataSetChanged();
-                                        areaBack.setVisibility(View.GONE);
-                                        windowTtile.setText(provinceTitle);
-                                        areaList.clear();
-                                    }
-                                });
-
-                                try {
-                                    /**
-                                     * 获取县级数据
-                                     */
-                                    windowTtile.setText(cityList.get(position).getName());
-                                    JSONObject cityObject = cityArray.getJSONObject(position);
-                                    JSONArray areaArray = cityObject.getJSONArray("area");
-                                    if (areaList != null) {
-                                        areaList.clear();
-                                    }
-                                    if (list != null) {
-                                        list.clear();
-                                    }
-                                    for (int i = 0; i < areaArray.length(); i++) {
-                                        list.add(areaArray.getString(i));
-                                    }
-                                    Log.i(TAG, list.toString());
-                                    for (int i = 0; i < list.size(); i++) {
-                                        CityResponse.CityBean.AreaBean response = new CityResponse.CityBean.AreaBean();
-                                        response.setName(list.get(i).toString());
-                                        areaList.add(response);
-                                    }
-                                    areaAdapter = new AreaAdapter(R.layout.item_city_list, areaList);
-                                    LinearLayoutManager manager = new LinearLayoutManager(context);
-                                    recyclerView.setLayoutManager(manager);
-                                    recyclerView.setAdapter(areaAdapter);
-                                    RecycleViewAnimation.runLayoutAnimationRight(recyclerView);
-
-                                    areaAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
+                            cityAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
+                                @Override
+                                public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
+                                    //返回上一级数据
+                                    areaBack.setVisibility(View.VISIBLE);
+                                    areaBack.setOnClickListener(new View.OnClickListener() {
                                         @Override
-                                        public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-                                            mPresenter.todayWeather(context, areaList.get(position).getName());
-                                            mPresenter.WeatherForecast(context, areaList.get(position).getName());
-                                            mPresenter.lifeSuggestion(context, areaList.get(position).getName());
-                                            cityWindow.closePopupWindow();
+                                        public void onClick(View v) {
+                                            recyclerView.setAdapter(cityAdapter);
+                                            cityAdapter.notifyDataSetChanged();
+                                            areaBack.setVisibility(View.GONE);
+                                            windowTitle.setText(provinceTitle);
+                                            areaList.clear();
                                         }
                                     });
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-        }
 
+                                    try {
+                                        /**
+                                         * 获取县级数据
+                                         */
+                                        windowTitle.setText(cityList.get(position).getName());
+                                        JSONObject cityObject = cityArray.getJSONObject(position);
+                                        JSONArray areaArray = cityObject.getJSONArray("area");
+                                        if (areaList != null) {
+                                            areaList.clear();
+                                        }
+                                        if (list != null) {
+                                            list.clear();
+                                        }
+                                        for (int i = 0; i < areaArray.length(); i++) {
+                                            list.add(areaArray.getString(i));
+                                        }
+                                        for (int i = 0; i < list.size(); i++) {
+                                            CityResponse.CityBean.AreaBean response = new CityResponse.CityBean.AreaBean();
+                                            response.setName(list.get(i).toString());
+                                            areaList.add(response);
+                                        }
+                                        areaAdapter = new AreaAdapter(R.layout.item_city_list, areaList);
+                                        LinearLayoutManager manager = new LinearLayoutManager(context);
+                                        recyclerView.setLayoutManager(manager);
+                                        recyclerView.setAdapter(areaAdapter);
+                                        RecycleViewAnimation.runLayoutAnimationRight(recyclerView);
+
+                                        areaAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
+                                            @Override
+                                            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
+                                                retrofit2.Call<LocationInfo> call = apiService_location.getCityId(areaList.get(position).getName());
+                                                call.enqueue(new retrofit2.Callback<LocationInfo>() {
+                                                    @Override
+                                                    public void onResponse(retrofit2.Call<LocationInfo> call, retrofit2.Response<LocationInfo> response) {
+                                                        if (response.body() != null) {
+                                                            String locationId;
+                                                            locationId = response.body().getLocation().get(0).getId();
+                                                            mPresenter.todayWeather(context, locationId);
+                                                            mPresenter.WeatherForecast(context, locationId);
+                                                            mPresenter.lifeSuggestion(context, locationId);
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(retrofit2.Call<LocationInfo> call, Throwable t) {
+                                                    }
+                                                });
+                                                areaTv.setText(areaList.get(position).getName());
+                                                cityWindow.closePopupWindow();
+                                            }
+                                        });
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            } catch (JSONException jsonException) {
+            jsonException.printStackTrace();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
     }
 
-    //获得今天的天气
+        //获得今天的天气
     private void getTodayWeather(double longitude, double latitude) {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()

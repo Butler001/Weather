@@ -11,6 +11,7 @@
         android:id="@+id/tv_city"
         android:textAppearance="@style/text_general"
         android:foreground="@drawable/rounded_corners"
+        android:text="河南省"
         android:gravity="center"
         android:padding="15dp"
         android:layout_width="match_parent"
