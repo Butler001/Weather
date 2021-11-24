@@ -1,6 +1,7 @@
 package com.example.mvplibrary.base;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.mvplibrary.R;
 import com.example.mvplibrary.kit.KnifeKit;
 
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +25,9 @@ public abstract class BaseFragment extends Fragment implements UiCallback {
     protected LayoutInflater layoutInflater;
     protected Activity context;
     private Unbinder unbinder;
+
+    //添加加载弹窗
+    private Dialog mDialog;
 
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
@@ -71,5 +76,28 @@ public abstract class BaseFragment extends Fragment implements UiCallback {
     @Override
     public void initBeforeView(Bundle savedInstanceState) {
 
+    }
+
+    /**
+     * 调用弹窗
+     */
+    public void showLoadingDialog(){
+        if (mDialog == null){
+            mDialog = new Dialog(context, R.style.dialog_loading);
+        }
+        mDialog.setContentView(R.layout.dialog_loading);
+        mDialog.setCancelable(false);
+        mDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        mDialog.show();
+    }
+
+    /**
+     * 结束弹窗
+     */
+    public void dismissLoadingDialog(){
+        if (mDialog != null){
+            mDialog.dismiss();
+        }
+        mDialog = null;
     }
 }

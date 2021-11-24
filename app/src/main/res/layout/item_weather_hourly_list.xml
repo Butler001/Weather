@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/white"
+    android:alpha="0.6"
+    android:padding="8dp"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+<!--    time-->
+    <TextView
+        android:id="@+id/tv_time"
+        android:textAppearance="@style/text_general"
+        android:text="上午10:00"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+<!--    icon-->
+    <ImageView
+        android:id="@+id/iv_weather_state_hourly"
+        android:layout_marginTop="@dimen/sp_12"
+        android:layout_marginBottom="8dp"
+        android:background="@mipmap/icon_100"
+        android:scaleType="fitCenter"
+        android:layout_width="30dp"
+        android:layout_height="30dp"/>
+<!--    temperature-->
+    <TextView
+        android:id="@+id/tv_temp_hourly"
+        android:textSize="20sp"
+        android:textColor="@color/black"
+        android:text="25℃"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+</LinearLayout>

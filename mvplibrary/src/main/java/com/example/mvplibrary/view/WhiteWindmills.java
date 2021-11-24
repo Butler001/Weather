@@ -88,7 +88,6 @@ public class WhiteWindmills extends View {
         TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.whiteWindmills);
         if (array != null){
             color = array.getColor(R.styleable.whiteWindmills_windColor, Color.WHITE);
-
             array.recycle();
         }
         //抗锯齿

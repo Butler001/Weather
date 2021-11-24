@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -17,7 +18,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"/>
-<!--        description-->
+<!--    text    description-->
         <TextView
             android:gravity="center"
             android:id="@+id/forecast_description"
@@ -26,6 +27,12 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"/>
+<!--        image description-->
+        <ImageView
+            android:id="@+id/iv_weather_state"
+            android:src="@mipmap/icon_100"
+            android:layout_width="30dp"
+            android:layout_height="30dp"/>
 <!--        max min in temp-->
         <TextView
             android:id="@+id/tv_max_min"

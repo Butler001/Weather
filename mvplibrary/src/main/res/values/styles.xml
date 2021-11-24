@@ -5,7 +5,7 @@
         <attr name="windColor" format="reference|color"/>
     </declare-styleable>
 
-    <!--    弹窗样式-->
+    <!--  城市  弹窗样式-->
     <style name="AnimationRightFade"> //右侧
         <item name="android:windowEnterAnimation">@anim/in_right_to_left</item>
         <item name="android:windowExitAnimation">@anim/out_left_to_right</item>
@@ -14,4 +14,37 @@
         <item name="android:windowEnterAnimation">@anim/in_bottom_to_top</item>
         <item name="android:windowExitAnimation">@anim/out_top_to_bottom</item>
     </style>
+<!--    加载弹窗的样式        为了保证这个动画能够供全局使用 所以把使用方法封装到底层的BaseActivity中-->
+    <style name="dialog_loading" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="windowNoTitle">true</item>
+        <item name="background">@null</item>
+        <item name="android:windowBackground">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+<!--    圆环进度条-->
+    <declare-styleable name="RoundProgressBar">
+        <attr name="round_max_progress" format="float"/>
+        <attr name="round_bg_color" format="color"/>
+        <attr name="round_stroke_width" format="dimension"/>
+        <attr name="round_progress" format="float"/>
+        <attr name="round_progress_color" format="color"/>
+        <attr name="round_first_text" format="string"/>
+        <attr name="round_first_text_color" format="color"/>
+        <attr name="round_first_text_size" format="dimension"/>
+        <attr name="round_second_text" format="string"/>
+        <attr name="round_second_text_color" format="color"/>
+        <attr name="round_second_text_size" format="dimension"/>
+        <attr name="round_min_text" format="string"/>
+        <attr name="round_min_text_color" format="color"/>
+        <attr name="round_min_text_size" format="dimension"/>
+        <attr name="round_max_text" format="string"/>
+        <attr name="round_max_text_color" format="color"/>
+        <attr name="round_max_text_size" format="dimension"/>
+        <attr name="round_angle_size" format="float"/>
+        <attr name="round_start_angle" format="float"/>
+    </declare-styleable>
 </resources>
